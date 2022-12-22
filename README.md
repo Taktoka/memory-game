@@ -18,7 +18,7 @@
 ### Links
 
 - Solution URL: [https://github.com/Taktoka/memory-game.git](https://github.com/Taktoka/memory-game.git)
-- Live Site URL: [https://notification-page-iota.vercel.app/](https://notification-page-iota.vercel.app/)
+- Live Site URL: [https://memory-game-bice.vercel.app/](https://memory-game-bice.vercel.app/)
 
 
 
