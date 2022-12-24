@@ -1,31 +1,29 @@
+let startScreen = document.querySelector(".start-screen");
+let startBtn = document.querySelector(".start-screen span");
 let input = document.querySelector(".start-screen input");
+let score = document.querySelector(".score span");
 let timer = document.querySelector(".timer ");
 let timerspan = document.querySelector(".game-info .time");
-let score = document.querySelector(".score span");
-let pscore = document.querySelector(".player .pscore");
-let PlayersArray = [];
-let scoArray = [];
-let duration = 1000;
 let allMatchedArray = [];
-let countDownInterv;
+let PlayersArray = [];
+let duration = 1000;
 
-// get from local storage
-checkzlocal();
+if (localStorage.getItem("palyers")) {
+  PlayersArray = JSON.parse(localStorage.getItem("palyers"));
+}
 getFromLocal();
-// handle start screen
 
-document.querySelector(".start-screen .start").onclick = () => {
+startBtn.onclick = () => {
   if (input.value === "") {
-    document.querySelector(".name span ").innerHTML = "unknown";
+    document.querySelector(".name span").innerHTML = "Unknown";
   } else {
-    document.querySelector(".name span ").innerHTML = input.value;
+    document.querySelector(".name span").innerHTML = input.value;
   }
   document.getElementById("start").play();
-  document.querySelector(".start-screen").style.display = "none";
+  startScreen.style.display = "none";
   countDown(60);
 };
 
-// count dpen function
 function countDown(time) {
   countDownInterv = setInterval(() => {
     let minutes = parseInt(time / 60);
@@ -40,116 +38,42 @@ function countDown(time) {
       addPlayer(PlayersArray);
       timerspan.style.animation = "pause";
       document.querySelector(".time-up").style.display = "block";
+      document.getElementById("fail").pause();
       document.getElementById("you-lose").play();
       clearInterval(countDownInterv);
     }
   }, duration);
 }
-// blocks Array
+
 let blocksArray = Array.from(
   document.querySelectorAll(".game-body .game-block")
 );
 
-// get order range array
-let orderRangeArray = [...Array(blocksArray.length).keys()];
-console.log(orderRangeArray);
-// trigger shuffle fun
-shuffling(orderRangeArray);
-console.log(orderRangeArray); // new random array
+let orderArray = [...Array(blocksArray.length).keys()];
+shuffling(orderArray);
 
-// loop to add random order & handle clicking
 blocksArray.forEach((block, index) => {
-  // add order prop
-  block.style.order = orderRangeArray[index];
-  //    handle click event
+  block.style.order = orderArray[index];
+
   block.addEventListener("click", () => {
-    // trigger flipping function
-    flipping(block);
+    flippBlock(block);
   });
 });
+let container = document.querySelector(".game-body");
 
-// flipping function
-function flipping(block) {
+function flippBlock(block) {
   block.classList.add("flipped");
-  //   collect flipped blocks
-  let flipedBlocks = blocksArray.filter((block) =>
+
+  let flippedArray = blocksArray.filter((block) =>
     block.classList.contains("flipped")
   );
-  //   check if theres two cards
-  if (flipedBlocks.length === 2) {
+  if (flippedArray.length === 2) {
     stopclicking();
-    checkMatched(flipedBlocks[0], flipedBlocks[1]);
+    checkMatchedBlc(flippedArray[0], flippedArray[1]);
   }
 }
 
-let blocksContainer = document.querySelector(".game-body");
-// stop clicking function
-function stopclicking() {
-  // add no click class
-  blocksContainer.classList.add("no-click");
-  // remove no click class
-
-  setTimeout(() => {
-    blocksContainer.classList.remove("no-click");
-  }, duration);
-}
-
-// checked matched
-function checkMatched(firstBlock, secondBlock) {
-  // check if matched
-  if (firstBlock.dataset.block === secondBlock.dataset.block) {
-    score.innerHTML = parseInt(score.innerHTML) + 5;
-
-    firstBlock.classList.remove("flipped");
-    secondBlock.classList.remove("flipped");
-
-    firstBlock.classList.add("matched");
-    secondBlock.classList.add("matched");
-
-    allMatchedArray.push(firstBlock, secondBlock);
-
-    if (allMatchedArray.length === blocksArray.length) {
-      addPlayer(PlayersArray);
-
-      clearInterval(countDownInterv);
-      document.querySelector(".time-up span").innerHTML = "You Won";
-      document.querySelector(".time-up").style.display = "block";
-      document.getElementById("done").play();
-    }
-    // play audio
-    document.getElementById("success").play();
-    // if not matched
-  } else {
-    setTimeout(() => {
-      firstBlock.classList.remove("flipped");
-      secondBlock.classList.remove("flipped");
-    }, duration);
-    document.getElementById("fail").play();
-  }
-}
-
-// shuffle function to random blocks order
-function shuffling(array) {
-  // get current elment
-  let current = array.length;
-  let temp;
-  let random;
-  while (current > 0) {
-    random = Math.floor(Math.random() * current);
-    // decrease current
-    current--;
-    // swapping
-    // 1) save current in statsh
-    array[current] = temp;
-    // 2)current ele = random ele
-    array[current] = array[random];
-    // 3)get element from statsh
-    temp = array[random];
-  }
-  return array;
-}
-
-function addPlayer() {
+function addPlayer(array) {
   let player = {
     id: input.value,
     score: score.innerHTML,
@@ -173,24 +97,63 @@ function createPlayer(array) {
   });
 }
 
-// add to local storage
 function addToLocal(array) {
   window.localStorage.setItem("players", JSON.stringify(array));
 }
-
-// get from ocal func
 function getFromLocal() {
   let data = window.localStorage.getItem("players");
 
   if (data) {
     PlayersArray = JSON.parse(data);
   }
-
   createPlayer(PlayersArray);
 }
 
-function checkzlocal() {
-  if (window.localStorage.getItem("players")) {
-    PlayersArray = JSON.parse(window.localStorage.getItem("players"));
+function stopclicking() {
+  container.classList.add("no-click");
+  setTimeout(() => {
+    container.classList.remove("no-click");
+  }, duration);
+}
+
+function checkMatchedBlc(firstBlc, scndBlc) {
+  if (firstBlc.dataset.block === scndBlc.dataset.block) {
+    score.innerHTML = parseInt(score.innerHTML) + 5;
+
+    firstBlc.classList.remove("flipped");
+    scndBlc.classList.remove("flipped");
+
+    firstBlc.classList.add("matched");
+    scndBlc.classList.add("matched");
+    document.getElementById("success").play();
+    allMatchedArray.push(firstBlc, scndBlc);
+    if (allMatchedArray.length === blocksArray.length) {
+      addPlayer(PlayersArray);
+      clearInterval(countDownInterv);
+      document.querySelector(".time-up span").innerHTML = "You Won";
+      document.querySelector(".time-up").style.display = "block";
+      document.getElementById("success").pause();
+      document.getElementById("done").play();
+    }
+  } else {
+    setTimeout(() => {
+      firstBlc.classList.remove("flipped");
+      scndBlc.classList.remove("flipped");
+    }, duration);
+    document.getElementById("fail").play();
   }
+}
+
+function shuffling(array) {
+  let current = array.length;
+  let temp;
+  let random;
+  while (current > 0) {
+    current--;
+    random = Math.floor(Math.random() * current);
+    array[current] = temp;
+    array[current] = array[random];
+    temp = array[random];
+  }
+  return array;
 }
